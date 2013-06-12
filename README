@@ -1,4 +1,4 @@
-emq
+emq - simple messaging ui library
+authors: Joseph Werle (joe@everybit.co) and Dominic Giglio (dom@everybit.co)
 
 emq is a simple messing ui library built on 0MQ
-
