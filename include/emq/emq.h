@@ -7,4 +7,7 @@
 /* we always use `stdbool` */
 #include <stdbool.h>
 
+void
+foo ();
+
 #endif
