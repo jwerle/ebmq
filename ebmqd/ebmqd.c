@@ -7,40 +7,42 @@
 #include "ebmqd.h"
 #include "commander.h"
 
+
 static void
 verbose_opt (command_t *self) {
   ebmq_enable_verbose();
-  ebmq_verbose("showing verbose output");
 }
 
 int
 main (int argc, char *argv[]) {
   command_t program;
 
-  /**
-   * we need to figure out the
-   * action being taken on the
-   * daemon process
-   */
-  if (ebmqd_has_command(argv, "start")) {
-    if (ebmqd_is_alive()) {
-      ebmq_error("daemon is already running");
-    } else {
-      ebmqd_start();
+  if (argc > 1) {
+    /**
+     * we need to figure out the
+     * action being taken on the
+     * daemon process
+     */
+    if (ebmqd_has_command(argv, "start")) {
+      if (ebmqd_is_alive()) {
+        ebmq_error("ebmqd: daemon is already running");
+      } else {
+        ebmqd_start();
+      }
+    } else if (ebmqd_has_command(argv, "stop")) {
+      if (ebmqd_is_alive()) {
+        ebmqd_stop();
+      } else {
+        ebmq_error("ebmqd: (nod pid file) not running");
+      }
     }
-  } else if (ebmqd_has_command(argv, "stop")) {
-    if (ebmqd_is_alive()) {
-      ebmqd_stop();
-    } else {
-      ebmq_error("daemon not running");
+    else if (ebmqd_has_command(argv, "restart")) {
+      ebmqd_restart();
     }
-  }
-  else if (ebmqd_has_command(argv, "restart")) {
-    ebmqd_restart();
   }
 
   // initialize program setting program version
-  command_init(&program, "ebmqd", EBMQ_VERSION);
+  command_init(&program, "ebmqd [start|stop|restart]", EBMQ_VERSION);
 
   command_option(&program, "-v", "--verbose", "enable verbose logging", verbose_opt);
 
@@ -79,7 +81,7 @@ ebmqd_start () {
    */
   pid = fork();
   if (pid < 0) {
-    ebmq_error("Failed to fork and get `pid`");
+    ebmq_error("ebmqd: failed to fork and get `pid`");
   }
 
   if (pid > 0) {
@@ -121,7 +123,7 @@ ebmqd_start () {
     exit(EXIT_FAILURE);
   }
 
-  ebmq_info("starting daemon..");
+  ebmq_log("ebmqd: starting daemon");
 
   // close all file descriptors
   ebmqd_close_fds();
@@ -146,7 +148,7 @@ ebmqd_start () {
 void
 ebmqd_stop () {
   if (!ebmqd_is_alive()) return;
-  ebmq_info("stoping daemon");
+  ebmq_log("ebmqd: stopping daemon");
   closelog();
   fflush(stdout);
   fflush(stdin);
@@ -155,7 +157,7 @@ ebmqd_stop () {
   ebmqd_kill();
   //
   if (!ebmqd_clear_pid()) {
-    ebmq_error("failed to clear pid");
+    ebmq_error("ebmqd: failed to clear pid");
   }
   // graceul exit
   exit(EXIT_SUCCESS);
@@ -171,7 +173,7 @@ ebmqd_restart () {
     ebmqd_stop();
     ebmqd_start();
   } else {
-    ebmq_error("daemon not running");
+    ebmq_error("ebmqd: (no pid file) not running");
   }
 }
 

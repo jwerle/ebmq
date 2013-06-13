@@ -331,6 +331,7 @@ ebmqd_is_alive () {
   else return 1;
 }
 
+
 /**
  * prototypes
  */

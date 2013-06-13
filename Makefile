@@ -1,3 +1,4 @@
+
 SRC = $(wildcard src/ebmq/*.c)
 SRC += $(wildcard deps/*.c)
 TESTS = $(wildcard test/*.c)
@@ -5,15 +6,20 @@ DAEMON = $(wildcard ebmqd/*.c)
 DAEMON_TEST = test/ebmqd.c
 LIB = /usr/local/lib
 CFLAGS = -L$(LIB) -lzmq
+PREFIX = /usr/local
+BIN = ebmqd
+
+
+.PHONY: test clean $(BIN)
 
 ##
 # daemon build
 ##
 
-ebmqd: $(SRC) $(DAEMON)
+$(BIN): $(SRC) $(DAEMON)
 	@make clean
 	@mkdir release
-	@$(CC) $^ -std=c99 -lm -I include -I deps -o release/ebmqd $(CFLAGS) 
+	@$(CC) $^ -std=c99 -lm -I include -I deps -o release/$(BIN) $(CFLAGS) 
 
 
 ##
@@ -32,13 +38,32 @@ test: $(SRC) $(TESTS)
 # daemon test
 ##
 
-ebmqd-test: $(SRC) $(DAEMON_TEST)
-	@make ebmqd
+$(BIN)-test: $(SRC) $(DAEMON_TEST)
+	@make $(BIN)
 	@$(CC) $^ -std=c99 -lm -I include -I deps -o release/test $(CFLAGS) 
 	@./release/test
 	@rm -rf release/test
 
+
+##
+# installs daemon to system
+##
+
+install: $(BIN)
+	@install release/$(BIN) $(PREFIX)/bin
+
+
+##
+# removes daemon from system
+##
+
+uninstall:
+	@rm $(PREFIX)/bin/$(BIN)
+
+
+##
+# cleans the repo of releases
+##
+
 clean:
 	@rm -rf release
-
-.PHONY: test clean ebmqd

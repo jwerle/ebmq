@@ -5,6 +5,9 @@
 #include "helpers.h"
 
 void
+ebmq_log (char *message);
+
+void
 ebmq_error (char *func);
 
 void

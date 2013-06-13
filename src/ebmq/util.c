@@ -9,8 +9,12 @@
 bool ebmq_verbose_enabled = false;
 
 void
+ebmq_log (char *message) {
+  puts(message);
+}
+
+void
 ebmq_error (char *func) {
-  printf("error: ");
   puts(func);
   exit(EXIT_FAILURE);
 }
