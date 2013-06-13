@@ -6,20 +6,20 @@
 #include <assert.h>
 #include <zmq.h>
 
-/* emq includes */
-#include "emq/util.h"
-#include "emq/server.h"
+/* ebmq includes */
+#include "ebmq/util.h"
+#include "ebmq/server.h"
 
 /**
- * Creates a new emq_server_t struct
+ * Creates a new ebmq_server_t struct
  *
  * @param {char} *host
- * @return emq_server_t *
+ * @return ebmq_server_t *
  */
-emq_server_t *
-emq_server_new (char *host) {
-  // initialize a new emq_server_t
-  emq_server_t *server = malloc(sizeof(emq_server_t));
+ebmq_server_t *
+ebmq_server_new (char *host) {
+  // initialize a new ebmq_server_t
+  ebmq_server_t *server = malloc(sizeof(ebmq_server_t));
   // set the host
   server->host = host; 
   // create context
@@ -37,41 +37,41 @@ emq_server_new (char *host) {
 }
 
 /**
- * Binds a new connection on a given emq_server_t struct
+ * Binds a new connection on a given ebmq_server_t struct
  *
- * @param {emq_server_t} *server
+ * @param {ebmq_server_t} *server
  */
 void
-emq_server_bind (emq_server_t *server) {
+ebmq_server_bind (ebmq_server_t *server) {
   int rc;
   // bind connection
   rc = zmq_bind(server->socket, server->host);
-  if (rc != 0) emq_error("emq_server_bind");
+  if (rc != 0) ebmq_error("ebmq_server_bind");
 }
 
 /**
  * Listens to a bound connection
  *
- * @param {emq_server_t} *server
+ * @param {ebmq_server_t} *server
  */
 void
-emq_server_listen (emq_server_t *server, void (*callback) (char[])) {
+ebmq_server_listen (ebmq_server_t *server, void (*callback) (char[])) {
   char *buffer;
   while (1) {
-    emq_debug("waiting");
+    ebmq_debug("waiting");
     buffer = s_recv(server->socket);
-    if (buffer == NULL) emq_error("emq_server_listen");
-    emq_debug("Got message");
-    emq_server_reply_ok(server);
+    if (buffer == NULL) ebmq_error("ebmq_server_listen");
+    ebmq_debug("Got message");
+    ebmq_server_reply_ok(server);
     callback(buffer);
     s_sleep(100);
   }
 }
 
 void
-emq_server_reply_ok (emq_server_t *server) {
+ebmq_server_reply_ok (ebmq_server_t *server) {
   int size;
-  emq_debug("reply: ok");
+  ebmq_debug("reply: ok");
   size = s_send(server->socket, "ok");
-  if (size == -1) emq_error("emq_server_reply_ok");
+  if (size == -1) ebmq_error("ebmq_server_reply_ok");
 }

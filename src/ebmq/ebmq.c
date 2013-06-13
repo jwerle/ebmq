@@ -1,6 +1,6 @@
 /* std include */
 #include <stdio.h>
 
-#include "emq/emq.h"
+#include "ebmq/ebmq.h"
 
 /* dummy main method */

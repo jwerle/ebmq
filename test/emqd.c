@@ -2,12 +2,12 @@
 #include <stdio.h>
 #include <assert.h>
 
-/* emq libs */
-#include "emq/emq.h"
+/* ebmq libs */
+#include "ebmq/ebmq.h"
 
 int
 main (int argc, char *argv[]) {
-  puts("\n[emqd test]\n");
+  puts("\n[ebmqd test]\n");
   
   return 0;
 }

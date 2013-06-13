@@ -1,5 +1,5 @@
-#ifndef EMQD_H
-#define EMQD_H
+#ifndef EBMQD_H
+#define EBMQD_H
 
 /* std include */
 #include <sys/types.h>
@@ -14,10 +14,10 @@
 #include <string.h>
 #include <stdbool.h>
 
-/* emq includes */
-#include "emq/emq.h"
-#include "emq/util.h"
-#include "emq/server.h"
+/* ebmq includes */
+#include "ebmq/ebmq.h"
+#include "ebmq/util.h"
+#include "ebmq/server.h"
 
 
 /**
@@ -31,7 +31,7 @@
  * @type {int}
  */
 
-static int EMQD_MS_SLEEP = 1000;
+static int EBMQD_MS_SLEEP = 1000;
 
 /**
  * Location of the `pid` file
@@ -40,7 +40,7 @@ static int EMQD_MS_SLEEP = 1000;
  * @
  */
 
-static char *EMQD_PID_FILE = "/var/run/emqd.pid";
+static char *EBMQD_PID_FILE = "/var/run/ebmqd.pid";
 
 /** 
  * Static pid
@@ -49,7 +49,7 @@ static char *EMQD_PID_FILE = "/var/run/emqd.pid";
  * @type {pid_t}
  */
 
-static pid_t emqd_pid;
+static pid_t ebmqd_pid;
 
 /** 
  * Static sid
@@ -58,29 +58,29 @@ static pid_t emqd_pid;
  * @type {pid_t}
  */
 
-static pid_t emqd_sid;
+static pid_t ebmqd_sid;
 
 
 /**
- * EMQD opts
+ * EBMQD opts
  */
 
-struct emqd_opts {
+struct ebmqd_opts {
   int IS_CHILD;
 };
 
 // define `OPTS` struct
-static struct emqd_opts OPTS;
+static struct ebmqd_opts OPTS;
 
 /**
  * Public `IS_CHILD` flag
  */
 
-#define EMQD_CHILD 0
+#define EBMQD_CHILD 0
 
 
 /**
- * emqd functions
+ * ebmqd functions
  */
 
 /**
@@ -91,8 +91,8 @@ static struct emqd_opts OPTS;
  */
 
 void
-emqd_sleep () {
-  s_sleep(EMQD_MS_SLEEP);
+ebmqd_sleep () {
+  s_sleep(EBMQD_MS_SLEEP);
 }
 
 /**
@@ -104,8 +104,8 @@ emqd_sleep () {
  */
 
 void
-emqd_set_sleep (int ms) {
-  EMQD_MS_SLEEP = ms;
+ebmqd_set_sleep (int ms) {
+  EBMQD_MS_SLEEP = ms;
 }
 
 /**
@@ -117,9 +117,9 @@ emqd_set_sleep (int ms) {
  */
 
 void
-*emqd_set_pid (pid_t pid) {
-  emqd_pid = pid;
-  return &emqd_pid;
+*ebmqd_set_pid (pid_t pid) {
+  ebmqd_pid = pid;
+  return &ebmqd_pid;
 }
 
 /**
@@ -130,8 +130,8 @@ void
  */
 
 pid_t
-*emqd_get_pid () {
-  return &emqd_pid;
+*ebmqd_get_pid () {
+  return &ebmqd_pid;
 }
 
 /**
@@ -143,9 +143,9 @@ pid_t
  */
 
 pid_t
-*emqd_set_sid (pid_t sid) {
-  emqd_sid = sid;
-  return &emqd_sid;
+*ebmqd_set_sid (pid_t sid) {
+  ebmqd_sid = sid;
+  return &ebmqd_sid;
 }
 
 /**
@@ -156,8 +156,8 @@ pid_t
  */
 
 pid_t
-*emqd_get_sid () {
-  return &emqd_sid;
+*ebmqd_get_sid () {
+  return &ebmqd_sid;
 }
 
 /**
@@ -168,7 +168,7 @@ pid_t
  */
 
 void
-emqd_close_fds () {
+ebmqd_close_fds () {
   close(STDIN_FILENO);
   close(STDOUT_FILENO);
   close(STDERR_FILENO);
@@ -185,7 +185,7 @@ emqd_close_fds () {
  */
 
 int
-emqd_has_command (char *argv[], char *command) {
+ebmqd_has_command (char *argv[], char *command) {
   if (strncmp(argv[1], command, sizeof(&command)) == 0) return 1;
   else return 0;
 }
@@ -199,8 +199,8 @@ emqd_has_command (char *argv[], char *command) {
  */
 
 void
-emqd_open_logs () {
-  openlog("emqd", LOG_NOWAIT|LOG_PID, LOG_USER);
+ebmqd_open_logs () {
+  openlog("ebmqd", LOG_NOWAIT|LOG_PID, LOG_USER);
 }
 
 /**
@@ -213,9 +213,9 @@ emqd_open_logs () {
  */
 
 void
-emqd_set_opt (int const opt, int value) {
+ebmqd_set_opt (int const opt, int value) {
   switch (opt) {
-    case EMQD_CHILD:
+    case EBMQD_CHILD:
       OPTS.IS_CHILD = value;
     break;
   }
@@ -230,9 +230,9 @@ emqd_set_opt (int const opt, int value) {
  */
 
 int
-emqd_get_opt (int const opt) {
+ebmqd_get_opt (int const opt) {
   switch (opt) {
-    case EMQD_CHILD:
+    case EBMQD_CHILD:
       return OPTS.IS_CHILD;
     break;
 
@@ -250,7 +250,7 @@ emqd_get_opt (int const opt) {
  */
 
 int
-emqd_is_root () {
+ebmqd_is_root () {
   uid_t uid = getuid(), euid = geteuid();
   if (getuid()) return 0;
   else if (geteuid()) return 0;
@@ -265,8 +265,8 @@ emqd_is_root () {
  */
 
 void 
-emqd_write_pid (pid_t pid) {
-  FILE *fp = fopen(EMQD_PID_FILE, "w+");
+ebmqd_write_pid (pid_t pid) {
+  FILE *fp = fopen(EBMQD_PID_FILE, "w+");
   fprintf(fp, "%d\n", pid);
   fclose(fp);
 }
@@ -279,10 +279,10 @@ emqd_write_pid (pid_t pid) {
  */
 
 pid_t
-emqd_read_pid () {
-  if (access(EMQD_PID_FILE, F_OK) < 0) return 0;
+ebmqd_read_pid () {
+  if (access(EBMQD_PID_FILE, F_OK) < 0) return 0;
   pid_t pid = 0;
-  FILE *fp = fopen(EMQD_PID_FILE, "r");
+  FILE *fp = fopen(EBMQD_PID_FILE, "r");
   fscanf(fp, "%d\n", &pid);
   return pid;
 }
@@ -295,8 +295,8 @@ emqd_read_pid () {
  */
 
 int
-emqd_kill () {
-  pid_t pid = emqd_read_pid();
+ebmqd_kill () {
+  pid_t pid = ebmqd_read_pid();
   if (pid <= 0) return 0;
   else if (!kill(pid, 9)) return 0;
   else return 1;
@@ -310,8 +310,8 @@ emqd_kill () {
  */
 
 int
-emqd_clear_pid () {
-  if (unlink(EMQD_PID_FILE) == 0) return 1;
+ebmqd_clear_pid () {
+  if (unlink(EBMQD_PID_FILE) == 0) return 1;
   else return 0;
 }
 
@@ -323,8 +323,8 @@ emqd_clear_pid () {
  */
 
 int
-emqd_is_alive () {
-  pid_t pid = emqd_read_pid();
+ebmqd_is_alive () {
+  pid_t pid = ebmqd_read_pid();
   if (pid <= 0) return 0;
   kill(pid, 0);
   if (errno == ESRCH) return 0;
@@ -336,15 +336,15 @@ emqd_is_alive () {
  */
 
  /**
- * Initializes emqd
+ * Initializes ebmqd
  *
  * @api public
  * @return {void}
  */
 
 void
-emqd_init () {
- emqd_set_opt(EMQD_CHILD, 0);
+ebmqd_init () {
+ ebmqd_set_opt(EBMQD_CHILD, 0);
 }
 
 /**
@@ -362,21 +362,27 @@ emqd_init () {
  */
 
 void
-emqd_start ();
+ebmqd_start ();
 
 /**
+ * Stops the daemon
  *
+ * @api public
+ * @return {void}
  */
 
 void
-emqd_stop ();
+ebmqd_stop ();
 
 /**
+ * Stops and restarts the daemon
  *
+ * @api public
+ * @return {void}
  */
 
 void
-emqd_restart ();
+ebmqd_restart ();
 
 
 #endif

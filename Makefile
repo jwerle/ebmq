@@ -1,8 +1,8 @@
-SRC = $(wildcard src/emq/*.c)
+SRC = $(wildcard src/ebmq/*.c)
 SRC += $(wildcard deps/*.c)
 TESTS = $(wildcard test/*.c)
-DAEMON = $(wildcard emqd/*.c)
-DAEMON_TEST = test/emqd.c
+DAEMON = $(wildcard ebmqd/*.c)
+DAEMON_TEST = test/ebmqd.c
 LIB = /usr/local/lib
 CFLAGS = -L$(LIB) -lzmq
 
@@ -10,10 +10,10 @@ CFLAGS = -L$(LIB) -lzmq
 # daemon build
 ##
 
-emqd: $(SRC) $(DAEMON)
+ebmqd: $(SRC) $(DAEMON)
 	@make clean
 	@mkdir release
-	@$(CC) $^ -std=c99 -lm -I include -I deps -o release/emqd $(CFLAGS) 
+	@$(CC) $^ -std=c99 -lm -I include -I deps -o release/ebmqd $(CFLAGS) 
 
 
 ##
@@ -32,8 +32,8 @@ test: $(SRC) $(TESTS)
 # daemon test
 ##
 
-emqd-test: $(SRC) $(DAEMON_TEST)
-	@make emqd
+ebmqd-test: $(SRC) $(DAEMON_TEST)
+	@make ebmqd
 	@$(CC) $^ -std=c99 -lm -I include -I deps -o release/test $(CFLAGS) 
 	@./release/test
 	@rm -rf release/test
@@ -41,4 +41,4 @@ emqd-test: $(SRC) $(DAEMON_TEST)
 clean:
 	@rm -rf release
 
-.PHONY: test clean emqd
+.PHONY: test clean ebmqd

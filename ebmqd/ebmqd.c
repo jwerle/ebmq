@@ -2,15 +2,15 @@
 #include <stdlib.h>
 #include <assert.h>
 
-/* emq includes */
-#include "emq/util.h"
-#include "emqd.h"
+/* ebmq includes */
+#include "ebmq/util.h"
+#include "ebmqd.h"
 #include "commander.h"
 
 static void
 verbose_opt (command_t *self) {
-  emq_enable_verbose();
-  emq_verbose("showing verbose output");
+  ebmq_enable_verbose();
+  ebmq_verbose("showing verbose output");
 }
 
 int
@@ -22,25 +22,25 @@ main (int argc, char *argv[]) {
    * action being taken on the
    * daemon process
    */
-  if (emqd_has_command(argv, "start")) {
-    if (emqd_is_alive()) {
-      emq_error("daemon is already running");
+  if (ebmqd_has_command(argv, "start")) {
+    if (ebmqd_is_alive()) {
+      ebmq_error("daemon is already running");
     } else {
-      emqd_start();
+      ebmqd_start();
     }
-  } else if (emqd_has_command(argv, "stop")) {
-    if (emqd_is_alive()) {
-      emqd_stop();
+  } else if (ebmqd_has_command(argv, "stop")) {
+    if (ebmqd_is_alive()) {
+      ebmqd_stop();
     } else {
-      emq_error("daemon not running");
+      ebmq_error("daemon not running");
     }
   }
-  else if (emqd_has_command(argv, "restart")) {
-    emqd_restart();
+  else if (ebmqd_has_command(argv, "restart")) {
+    ebmqd_restart();
   }
 
   // initialize program setting program version
-  command_init(&program, "emqd", EMQ_VERSION);
+  command_init(&program, "ebmqd", EBMQ_VERSION);
 
   command_option(&program, "-v", "--verbose", "enable verbose logging", verbose_opt);
 
@@ -57,10 +57,10 @@ main (int argc, char *argv[]) {
  * Starts the daemon
  */
 void
-emqd_start () {
+ebmqd_start () {
   pid_t pid, sid;
-  if (emqd_is_root() == 0) {
-    emq_error("Operation not permitted");
+  if (ebmqd_is_root() == 0) {
+    ebmq_error("Operation not permitted");
   }
 
   /** 
@@ -79,20 +79,20 @@ emqd_start () {
    */
   pid = fork();
   if (pid < 0) {
-    emq_error("Failed to fork and get `pid`");
+    ebmq_error("Failed to fork and get `pid`");
   }
 
   if (pid > 0) {
     // write pid to file
-    emqd_write_pid(pid);
-    emqd_set_opt(EMQD_CHILD, 1);
+    ebmqd_write_pid(pid);
+    ebmqd_set_opt(EBMQD_CHILD, 1);
     exit(EXIT_SUCCESS);
   }
 
-  emqd_set_pid(pid);
+  ebmqd_set_pid(pid);
 
   // ensure the pid was set internally
-  assert(emqd_get_pid() > 0);
+  assert(ebmqd_get_pid() > 0);
 
   // set the unmask to `0`
   umask(0);
@@ -106,10 +106,10 @@ emqd_start () {
     exit(EXIT_FAILURE);
   }
 
-  emqd_set_sid(sid);
+  ebmqd_set_sid(sid);
 
   // ensure the sid was set internally
-  assert(emqd_get_sid() > 0);
+  assert(ebmqd_get_sid() > 0);
 
   /**
    * set root working directory
@@ -121,18 +121,18 @@ emqd_start () {
     exit(EXIT_FAILURE);
   }
 
-  emq_info("starting daemon..");
+  ebmq_info("starting daemon..");
 
   // close all file descriptors
-  emqd_close_fds();
+  ebmqd_close_fds();
 
   // open logs
-  emqd_open_logs();
+  ebmqd_open_logs();
 
   // main loop
   while (1) {
     // magic
-    emqd_sleep();
+    ebmqd_sleep();
   }
 
   // ensure successful exit
@@ -144,18 +144,18 @@ emqd_start () {
  * Stops the daemon
  */
 void
-emqd_stop () {
-  if (!emqd_is_alive()) return;
-  emq_info("stoping daemon");
+ebmqd_stop () {
+  if (!ebmqd_is_alive()) return;
+  ebmq_info("stoping daemon");
   closelog();
   fflush(stdout);
   fflush(stdin);
   fflush(stderr);
   // kill process
-  emqd_kill();
+  ebmqd_kill();
   //
-  if (!emqd_clear_pid()) {
-    emq_error("failed to clear pid");
+  if (!ebmqd_clear_pid()) {
+    ebmq_error("failed to clear pid");
   }
   // graceul exit
   exit(EXIT_SUCCESS);
@@ -166,12 +166,12 @@ emqd_stop () {
  * Stops and starts the daemon
  */
 void
-emqd_restart () {
-  if (emqd_is_alive()) {
-    emqd_stop();
-    emqd_start();
+ebmqd_restart () {
+  if (ebmqd_is_alive()) {
+    ebmqd_stop();
+    ebmqd_start();
   } else {
-    emq_error("daemon not running");
+    ebmq_error("daemon not running");
   }
 }
 
