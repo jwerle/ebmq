@@ -7,8 +7,7 @@
 
 int
 main (int argc, char *argv[]) {
-  puts("\n[emq test]\n");
-  /* assert version is defined */
-  assert(EMQ_VERSION); puts("  - version ok");
+  puts("\n[emqd test]\n");
+  
   return 0;
 }

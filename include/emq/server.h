@@ -8,7 +8,7 @@
 typedef struct {
 
   char *host;
-  void *context
+  void *context;
   void *socket;
 
 } emq_server_t;

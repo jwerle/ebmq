@@ -1,8 +1,14 @@
+/* std includes */
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
 #include <zmq.h>
+
+/* emq includes */
+#include "emq/util.h"
+#include "emq/server.h"
 
 /**
  * Creates a new emq_server_t struct

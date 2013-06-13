@@ -1,0 +1,382 @@
+#ifndef EMQD_H
+#define EMQD_H
+
+/* std include */
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <syslog.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <unistd.h>
+#include <syslog.h>
+#include <string.h>
+#include <stdbool.h>
+
+/* emq includes */
+#include "emq/emq.h"
+#include "emq/util.h"
+#include "emq/server.h"
+
+
+/**
+ * statics
+ */
+
+/**
+ * Static sleep count in `ms`
+ *
+ * @api private
+ * @type {int}
+ */
+
+static int EMQD_MS_SLEEP = 1000;
+
+/**
+ * Location of the `pid` file
+ *
+ * @api private
+ * @
+ */
+
+static char *EMQD_PID_FILE = "/var/run/emqd.pid";
+
+/** 
+ * Static pid
+ *
+ * @api private
+ * @type {pid_t}
+ */
+
+static pid_t emqd_pid;
+
+/** 
+ * Static sid
+ *
+ * @api private
+ * @type {pid_t}
+ */
+
+static pid_t emqd_sid;
+
+
+/**
+ * EMQD opts
+ */
+
+struct emqd_opts {
+  int IS_CHILD;
+};
+
+// define `OPTS` struct
+static struct emqd_opts OPTS;
+
+/**
+ * Public `IS_CHILD` flag
+ */
+
+#define EMQD_CHILD 0
+
+
+/**
+ * emqd functions
+ */
+
+/**
+ * Sleeps a the set internal count in `ms`
+ *
+ * @api public
+ * @return {void}
+ */
+
+void
+emqd_sleep () {
+  s_sleep(EMQD_MS_SLEEP);
+}
+
+/**
+ * Sets the internal sleep count in `ms`
+ *
+ * @api public
+ * @return {void}
+ * @param {int} ms
+ */
+
+void
+emqd_set_sleep (int ms) {
+  EMQD_MS_SLEEP = ms;
+}
+
+/**
+ *  Sets the internal daemon pid
+ *
+ * @api public
+ * @return {pid_t} *pid
+ * @param {pid_t} *pid
+ */
+
+void
+*emqd_set_pid (pid_t pid) {
+  emqd_pid = pid;
+  return &emqd_pid;
+}
+
+/**
+ * Gets the internal daemon pid
+ *
+ * @api public
+ * @return {pid_t} *pid
+ */
+
+pid_t
+*emqd_get_pid () {
+  return &emqd_pid;
+}
+
+/**
+ * Sets the internal unique session id (SID)
+ *
+ * @api public
+ * @return {pid_t} sid
+ * @param {pid_t} *sid
+ */
+
+pid_t
+*emqd_set_sid (pid_t sid) {
+  emqd_sid = sid;
+  return &emqd_sid;
+}
+
+/**
+ * Gets the internal unique session id (SID)
+ *
+ * @api public
+ * @return {pid_t} *sid
+ */
+
+pid_t
+*emqd_get_sid () {
+  return &emqd_sid;
+}
+
+/**
+ * Closes the stdin, stdout, and stderr file descriptors
+ *
+ * @api public
+ * @return {void}
+ */
+
+void
+emqd_close_fds () {
+  close(STDIN_FILENO);
+  close(STDOUT_FILENO);
+  close(STDERR_FILENO);
+}
+
+/**
+ * Checks if the given char array has
+ * the command as the leading argument
+ *
+ * @api public
+ * @return {int}
+ * @param {char} *argv
+ * @param {char} *command
+ */
+
+int
+emqd_has_command (char *argv[], char *command) {
+  if (strncmp(argv[1], command, sizeof(&command)) == 0) return 1;
+  else return 0;
+}
+
+/**
+ * Opens the log files for writing
+ *
+ * @api public
+ * @return {void}
+ * @param {char} *identity
+ */
+
+void
+emqd_open_logs () {
+  openlog("emqd", LOG_NOWAIT|LOG_PID, LOG_USER);
+}
+
+/**
+ * Sets an internal option
+ *
+ * @api public
+ * @return {void}
+ * @param {int const} opt
+ * @param {int} value
+ */
+
+void
+emqd_set_opt (int const opt, int value) {
+  switch (opt) {
+    case EMQD_CHILD:
+      OPTS.IS_CHILD = value;
+    break;
+  }
+}
+
+/**
+ * Gets an internal option
+ *
+ * @ api public
+ * @return {int}
+ * @param {int const} opt
+ */
+
+int
+emqd_get_opt (int const opt) {
+  switch (opt) {
+    case EMQD_CHILD:
+      return OPTS.IS_CHILD;
+    break;
+
+    default: return 0;
+  }
+
+  return 0;
+}
+
+/**
+ * Checks if user is root
+ *
+ * @api public
+ * @return {int}
+ */
+
+int
+emqd_is_root () {
+  uid_t uid = getuid(), euid = geteuid();
+  if (getuid()) return 0;
+  else if (geteuid()) return 0;
+  else return 1;
+}
+
+/**
+ * Writes pid to file
+ *
+ * @api public
+ * @return {void}
+ */
+
+void 
+emqd_write_pid (pid_t pid) {
+  FILE *fp = fopen(EMQD_PID_FILE, "w+");
+  fprintf(fp, "%d\n", pid);
+  fclose(fp);
+}
+
+/**
+ * Gets the active daemon pid
+ *
+ * @api public
+ * @return {int}
+ */
+
+pid_t
+emqd_read_pid () {
+  if (access(EMQD_PID_FILE, F_OK) < 0) return 0;
+  pid_t pid = 0;
+  FILE *fp = fopen(EMQD_PID_FILE, "r");
+  fscanf(fp, "%d\n", &pid);
+  return pid;
+}
+
+/**
+ * Kills the daemon process
+ *
+ * @api public
+ * @return {int}
+ */
+
+int
+emqd_kill () {
+  pid_t pid = emqd_read_pid();
+  if (pid <= 0) return 0;
+  else if (!kill(pid, 9)) return 0;
+  else return 1;
+}
+
+/**
+ * Clears the pid file
+ *
+ * @api public
+ * @return {void}
+ */
+
+int
+emqd_clear_pid () {
+  if (unlink(EMQD_PID_FILE) == 0) return 1;
+  else return 0;
+}
+
+/**
+ * Checks if daemon is running
+ *
+ * @api public
+ * @return {int}
+ */
+
+int
+emqd_is_alive () {
+  pid_t pid = emqd_read_pid();
+  if (pid <= 0) return 0;
+  kill(pid, 0);
+  if (errno == ESRCH) return 0;
+  else return 1;
+}
+
+/**
+ * prototypes
+ */
+
+ /**
+ * Initializes emqd
+ *
+ * @api public
+ * @return {void}
+ */
+
+void
+emqd_init () {
+ emqd_set_opt(EMQD_CHILD, 0);
+}
+
+/**
+ * Starts the daemon and performs these tasks:
+ * - forks parent process
+ * - set umask to `0`
+ * - open logs for writing
+ * - setting unique SID
+ * - change to `/` directory
+ * - closes standard file descriptors
+ *
+ *
+ * @api public
+ * @return {void}
+ */
+
+void
+emqd_start ();
+
+/**
+ *
+ */
+
+void
+emqd_stop ();
+
+/**
+ *
+ */
+
+void
+emqd_restart ();
+
+
+#endif
