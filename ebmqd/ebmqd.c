@@ -81,6 +81,7 @@ ebmqd_start () {
    */
   pid = fork();
   if (pid < 0) {
+    ebmqd_log(LOG_ERR, "failed to fork child");
     ebmq_error("ebmqd: failed to fork and get `pid`");
   }
 
@@ -105,6 +106,7 @@ ebmqd_start () {
    */
   sid = setsid();
   if (sid < 0) {
+    ebmqd_log(LOG_ERR, "failed to obtain sid");
     exit(EXIT_FAILURE);
   }
 
@@ -124,6 +126,7 @@ ebmqd_start () {
   }
 
   ebmq_log("ebmqd: starting daemon");
+  ebmqd_log(LOG_INFO, "starting");
 
   // close all file descriptors
   ebmqd_close_fds();
@@ -157,6 +160,7 @@ ebmqd_stop () {
   ebmqd_kill();
   //
   if (!ebmqd_clear_pid()) {
+    ebmqd_log(LOG_ERR, "failed to remove ebmqd.pid");
     ebmq_error("ebmqd: failed to clear pid");
   }
   // graceul exit
