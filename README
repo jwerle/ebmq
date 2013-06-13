@@ -1,4 +1,12 @@
-emq - simple messaging ui library
+ebmq - simple messaging ui library
 authors: Joseph Werle (joe@everybit.co) and Dominic Giglio (dom@everybit.co)
 
-emq is a simple messing ui library built on 0MQ
+ebmq is a simple messing ui library built on 0MQ
+
+Usage:
+  - Starting the daemon
+    `ebmqd start`
+  - Stopping the daemon
+    `ebmqd stop`
+  - restarting the daemon
+    `ebmqd restart`
