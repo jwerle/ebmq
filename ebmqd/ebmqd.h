@@ -331,6 +331,20 @@ ebmqd_is_alive () {
   else return 1;
 }
 
+/**
+ * Writes to log file
+ *
+ * @api public
+ * @return {void}
+ * @param {int} level
+ * @param {char} *message
+ */
+
+void
+ebmqd_log (int level, char *message) {
+  syslog(level, "%s", message);
+}
+
 
 /**
  * prototypes
