@@ -342,7 +342,7 @@ ebmqd_is_alive () {
 
 void
 ebmqd_log (int level, char *message) {
-  syslog(level, "%s", message);
+  syslog(level, "ebmqd: %s", message);
 }
 
 
