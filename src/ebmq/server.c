@@ -58,10 +58,8 @@ void
 ebmq_server_listen (ebmq_server_t *server, void (*callback) (char[])) {
   char *buffer;
   while (1) {
-    ebmq_debug("waiting");
     buffer = s_recv(server->socket);
     if (buffer == NULL) ebmq_error("ebmq_server_listen");
-    ebmq_debug("Got message");
     ebmq_server_reply_ok(server);
     callback(buffer);
     s_sleep(100);

@@ -8,10 +8,19 @@
 #include "commander.h"
 
 
+/**
+ * Command options
+ */
+
 static void
 verbose_opt (command_t *self) {
   ebmq_enable_verbose();
 }
+
+
+/**
+ * main function 
+ */
 
 int
 main (int argc, char *argv[]) {
@@ -61,6 +70,8 @@ main (int argc, char *argv[]) {
 void
 ebmqd_start () {
   pid_t pid, sid;
+  char *buffer;
+
   if (ebmqd_is_root() == 0) {
     ebmq_error("Operation not permitted");
   }
@@ -134,9 +145,17 @@ ebmqd_start () {
   // open logs
   ebmqd_open_logs();
 
+  // create a new server struct
+  ebmq_server_t *server = ebmq_server_new("tcp://*:5555");
+
+  // bind connection
+  ebmq_server_bind(server);
+
   // main loop
   while (1) {
-    // magic
+    //buffer = s_recv(server->socket);
+    //if (buffer == NULL) ebmq_error("ebmq_server_listen");
+    //ebmq_server_reply_ok(server);
     ebmqd_sleep();
   }
 
