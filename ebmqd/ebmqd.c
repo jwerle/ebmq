@@ -47,6 +47,10 @@ main (int argc, char *argv[]) {
     }
     else if (ebmqd_has_command(argv, "restart")) {
       ebmqd_restart();
+    } else {
+      char *str;
+      sprintf(str,"ebmqd: invalid command `%s`", argv[1]);
+      ebmq_error(str);
     }
   }
 
