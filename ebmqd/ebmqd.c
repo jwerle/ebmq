@@ -26,7 +26,7 @@ int
 main (int argc, char *argv[]) {
   command_t program;
 
-  if (argc > 1) {
+  if (argc > 1 && strncmp(&argv[1][0], "-", 1)) {
     /**
      * we need to figure out the
      * action being taken on the
