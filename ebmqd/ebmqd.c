@@ -80,71 +80,71 @@ ebmqd_start () {
     ebmq_error("Operation not permitted");
   }
 
-  /** 
-   * Flush stdout, stdin, and stderr
-   * so forked process does not inherit
-   * streams
-   */
-  fflush(stdout);
-  fflush(stdin);
-  fflush(stderr);
+  // /** 
+  //  * Flush stdout, stdin, and stderr
+  //  * so forked process does not inherit
+  //  * streams
+  //  */
+  // fflush(stdout);
+  // fflush(stdin);
+  // fflush(stderr);
 
-  /**
-   * set the pid and exit with failure if it
-   * failed to return one greater than `0`
-   * else exit with success
-   */
-  pid = fork();
-  if (pid < 0) {
-    ebmqd_log(LOG_ERR, "failed to fork child");
-    ebmq_error("ebmqd: failed to fork and get `pid`");
-  }
+  // /**
+  //  * set the pid and exit with failure if it
+  //  * failed to return one greater than `0`
+  //  * else exit with success
+  //  */
+  // pid = fork();
+  // if (pid < 0) {
+  //   ebmqd_log(LOG_ERR, "failed to fork child");
+  //   ebmq_error("ebmqd: failed to fork and get `pid`");
+  // }
 
-  if (pid > 0) {
-    // write pid to file
-    ebmqd_write_pid(pid);
-    ebmqd_set_opt(EBMQD_CHILD, 1);
-    exit(EXIT_SUCCESS);
-  }
+  // if (pid > 0) {
+  //   // write pid to file
+  //   ebmqd_write_pid(pid);
+  //   ebmqd_set_opt(EBMQD_CHILD, 1);
+  //   exit(EXIT_SUCCESS);
+  // }
 
-  ebmqd_set_pid(pid);
+  // ebmqd_set_pid(pid);
 
-  // ensure the pid was set internally
-  assert(ebmqd_get_pid() > 0);
+  // // ensure the pid was set internally
+  // assert(ebmqd_get_pid() > 0);
 
-  // set the unmask to `0`
-  umask(0);
+  // // set the unmask to `0`
+  // umask(0);
 
-  /**
-   * set the sid and exit with failure if
-   * it failed to return one greater than `0`
-   */
-  sid = setsid();
-  if (sid < 0) {
-    ebmqd_log(LOG_ERR, "failed to obtain sid");
-    exit(EXIT_FAILURE);
-  }
+  // /**
+  //  * set the sid and exit with failure if
+  //  * it failed to return one greater than `0`
+  //  */
+  // sid = setsid();
+  // if (sid < 0) {
+  //   ebmqd_log(LOG_ERR, "failed to obtain sid");
+  //   exit(EXIT_FAILURE);
+  // }
 
-  ebmqd_set_sid(sid);
+  // ebmqd_set_sid(sid);
 
-  // ensure the sid was set internally
-  assert(ebmqd_get_sid() > 0);
+  // // ensure the sid was set internally
+  // assert(ebmqd_get_sid() > 0);
 
-  /**
-   * set root working directory
-   * and exit with a failure if
-   * it failed to return greater
-   * than `0`
-   */
-  if (chdir("/") < 0) {
-    exit(EXIT_FAILURE);
-  }
+  // /**
+  //  * set root working directory
+  //  * and exit with a failure if
+  //  * it failed to return greater
+  //  * than `0`
+  //  */
+  // if (chdir("/") < 0) {
+  //   exit(EXIT_FAILURE);
+  // }
 
   ebmq_log("ebmqd: starting daemon");
   ebmqd_log(LOG_INFO, "starting");
 
   // close all file descriptors
-  ebmqd_close_fds();
+  //ebmqd_close_fds();
 
   // open logs
   ebmqd_open_logs();
@@ -157,9 +157,11 @@ ebmqd_start () {
 
   // main loop
   while (1) {
-    //buffer = s_recv(server->socket);
-    //if (buffer == NULL) ebmq_error("ebmq_server_listen");
-    //ebmq_server_reply_ok(server);
+    buffer = s_recv(server->socket);
+    if (buffer == NULL) ebmq_error("ebmq_server_listen");
+    puts("got message");
+    ebmq_server_reply_ok(server);
+    s_console(buffer);
     ebmqd_sleep();
   }
 
